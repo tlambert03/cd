@@ -1,0 +1,80 @@
+image: Visual Studio 2015
+
+environment:
+  matrix:
+    - CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      ARCH: "x64"
+
+  global:
+      FFTW_ROOT: "%APPVEYOR_BUILD_FOLDER%\\bin\\fftw"
+      LIBTIFF_ROOT: "C:\\libtiff"
+      ZLIB_ROOT: "C:\\zlib"
+      BOOST_ROOT: C:/Libraries/boost_1_67_0
+      BOOST_LIBRARYDIR: C:/Libraries/boost_1_67_0/lib64-msvc-15.0
+      
+cache:
+  - C:\libtiff\
+  - C:\libtiff\
+  
+# scripts that run after cloning repository
+init:
+  - dir C:/Libraries/boost_1_67_0/
+  - echo init step
+  - cmake --version
+  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+  - cmd: exit 1
+  
+install:  
+  - echo Downloading CUDA toolkit 9.0
+  # - appveyor DownloadFile "https://developer.nvidia.com/compute/cuda/9.2/Prod2/local_installers/cuda_9.2.148_win10" -FileName install_cuda.exe
+  - appveyor DownloadFile "https://developer.nvidia.com/compute/cuda/9.0/Prod/network_installers/cuda_9.0.176_windows_network-exe" -FileName install_cuda.exe
+  - install_cuda.exe -s compiler_9.0 cudart_9.0 cufft_9.0 cufft_dev_9.0 samples_9.0
+  # cublas_9.0 cublas_dev_9.0 cufft_9.0 cufft_dev_9.0 samples_9.0
+  - echo DONE
+  - set PATH=%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v9.0\nvvm\bin;%PATH%
+  - set PATH=%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v9.0\bin;%PATH%
+  - nvcc --version
+
+  - echo Installing FFTW
+  - ps: mkdir $env:FFTW_ROOT
+  - ps: pushd $env:FFTW_ROOT
+  # This downloads the windows 64-bit pre-compiled dlls
+  - ps: wget ftp://ftp.fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -OutFile fftw-3.3.5-dll64.zip
+  - ps: 7z x fftw-3.3.5-dll64.zip
+#  - ps: pushd fftw-3.3.4-dll64
+  - ps: lib /machine:x64 /def:libfftw3-3.def
+  - ps: lib /machine:x64 /def:libfftw3f-3.def
+  - ps: lib /machine:x64 /def:libfftw3l-3.def
+  
+  - echo Installing zlib
+  - ps: mkdir $env:ZLIB_ROOT
+  - ps: pushd $env:ZLIB_ROOT
+  #- appveyor DownloadFile https://zlib.net/zlib1211.zip
+  #- ps: 7z x zlib1211.zip
+  - appveyor DownloadFile https://raw.githubusercontent.com/horta/zlib.install/master/install.bat
+  - install.bat
+  - ps: dir "C:\Program Files\zlib\lib\"
+    
+  - echo Installing libtiff
+  - ps: mkdir $env:LIBTIFF_ROOT
+  - ps: pushd $env:LIBTIFF_ROOT
+  - appveyor DownloadFile https://download.osgeo.org/libtiff/tiff-4.0.9.zip
+  - ps: 7z x tiff-4.0.9.zip
+  - cmd: rename tiff-4.0.9 libtiff
+  - cmd: cd libtiff
+  - cmake -G "Visual Studio 14 2015 Win64" -DZLIB_INCLUDE_DIR:STRING="C:\Program Files\zlib\include"
+  - cmake --build . --config Release
+  # - ctest -V -C Release
+
+  - ps: cd $env:APPVEYOR_BUILD_FOLDER
+  - ps: mkdir build
+  - ps: cd build
+  - cmake -D CMAKE_BUILD_TYPE=Release .. -G "NMake Makefiles"
+  - nmake
+
+build: off
+  
+  
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
