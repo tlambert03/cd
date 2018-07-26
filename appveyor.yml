@@ -14,7 +14,7 @@ environment:
       
 cache:
   - C:\libtiff\
-  - C:\libtiff\
+  - %ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\
   
 # scripts that run after cloning repository
 init:
