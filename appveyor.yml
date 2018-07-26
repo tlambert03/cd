@@ -9,8 +9,8 @@ environment:
       FFTW_ROOT: "%APPVEYOR_BUILD_FOLDER%\\bin\\fftw"
       LIBTIFF_ROOT: "C:\\libtiff"
       ZLIB_ROOT: "C:\\zlib"
-      BOOST_ROOT: C:/Libraries/boost_1_67_0
-      BOOST_LIBRARYDIR: C:/Libraries/boost_1_67_0/lib64-msvc-15.0
+      BOOST_ROOT: "C:\\Libraries\\boost_1_67_0"
+      BOOST_LIBRARYDIR: "C:\\Libraries\\boost_1_67_0\\lib64-msvc-15.0"
       
 cache:
   - C:\libtiff\
@@ -18,7 +18,7 @@ cache:
   
 # scripts that run after cloning repository
 init:
-  - dir C:/Libraries/boost_1_67_0/
+  - dir C:\\Libraries\\boost_1_67_0\\
   - echo init step
   - cmake --version
   - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
