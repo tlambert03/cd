@@ -18,7 +18,7 @@ cache:
   
 # scripts that run after cloning repository
 init:
-  - dir C:/Libraries/boost_1_67_0
+  - dir "C:\Libraries\boost_1_67_0"
   - echo init step
   - cmake --version
   - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
